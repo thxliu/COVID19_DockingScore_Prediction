@@ -28,6 +28,29 @@ MultiOutputRegressor to handle multiple docking score targets simultaneously
 Input features: 1024-bit Morgan fingerprints converted from SMILES strings
 
 # MIMINAL REPRODUCIBLE EXAMPLE/TUTORIAL
+The recommended structure of the modeling process is as follows:
+1. Install dependencies
+2. Load a small dataset
+3. Convert SMILES to Morgan fingerprints
+4. Train a multi-output regression model
+5. Evaluate and interpret predictions
+
+Use the truncated train and test data CSVs (small_train_data.csv, small_test_data.csv) and load them into the model. The small datasets will greatly reduce the runtime for the model for an exploratory introduction. 
+
+train_data = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/train/small_train_data.csv")
+test_data  = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/test/small_test_csv.csv")
+
+*IMPORTS*
+`import numpy as np
+import pandas as pd
+from rdkit import Chem
+from rdkit.Chem import rdFingerprintGenerator
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error`
+
+
 
 # DATA
 Data used from Kaggle’s COVID-19 Bioinformatics Drug Target Challenge that can be found at https://www.kaggle.com/competitions/covid-19-bioinformatics-drug-target-challenge/overview. 
