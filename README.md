@@ -35,11 +35,6 @@ The recommended structure of the modeling process is as follows:
 4. Train a multi-output regression model
 5. Evaluate and interpret predictions
 
-Use the truncated train and test data CSVs (small_train_data.csv, small_test_data.csv) and load them into the model. The small datasets will greatly reduce the runtime for the model for an exploratory introduction. 
-
-train_data = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/train/small_train_data.csv")
-test_data  = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/test/small_test_csv.csv")
-
 *IMPORTS*
 
 `import numpy as np`
@@ -51,11 +46,90 @@ test_data  = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-chal
 `from rdkit.Chem import rdFingerprintGenerator`
 
 `from sklearn.ensemble import RandomForestRegressor`
+
 `from sklearn.multioutput import MultiOutputRegressor`
+
 `from sklearn.model_selection import train_test_split`
+
 `from sklearn.metrics import mean_absolute_error`
 
+*LOAD A SMALL DATASET*
 
+Use the truncated train and test data CSVs (small_train_data.csv, small_test_data.csv) and load them into the model. The small datasets will greatly reduce the runtime for the model for an exploratory introduction. 
+
+`train_data = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/train/small_train_data.csv")`
+
+`test_data  = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/test/small_test_csv.csv")`
+
+*CONVERT SMILES TO MORGAN FINGERPRINTS*
+
+This converts variable-length SMILES strings into fixed-length numerical vectors (1024 bits in this case) usable by ML models.
+
+`def smiles_to_morgan(smiles, radius=2, n_bits=1024):
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return np.zeros(n_bits, dtype=int)`
+
+    fpgen = rdFingerprintGenerator.GetMorganGenerator(
+        radius=radius, fpSize=n_bits
+    )
+    fp = fpgen.GetFingerprint(mol)
+
+    arr = np.zeros(n_bits, dtype=int)
+    for bit in fp.GetOnBits():
+        arr[bit] = 1
+    return arr
+
+*TRAIN THE MODEL*
+
+Feature matrix and targets: 
+
+`target_cols = ['3CLPro_pocket1', 'ADRP-ADPR_pocket1', 'ADRP-ADPR_pocket5', 
+               'ADRP_pocket1', 'ADRP_pocket12', 'ADRP_pocket13', 'COV_pocket1', 
+               'COV_pocket2', 'COV_pocket8', 'COV_pocket10', 'NSP9_pocket2', 
+               'NSP9_pocket7', 'NSP15_pocket1', 'ORF7A_pocket2', 
+               'PLPro_chainA_pocket3', 'PLPro_chainA_pocket23', 'PLPro_pocket6', 
+               'PLPro_pocket50']`
+
+`X = np.array([smiles_to_morgan(s) for s in df["SMILES"]])`
+
+`y = df[target_cols].values`
+
+Train and test splits:
+
+`X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)`
+
+Training the model:
+
+`model = MultiOutputRegressor(
+    RandomForestRegressor(
+        n_estimators=100,
+        random_state=42,
+        n_jobs=-1
+    )
+)`
+
+`model.fit(X_train, y_train)`
+
+*EVALUATE THE MODEL*
+
+Evaluation:
+
+`y_pred = model.predict(X_val)`
+
+`mae = mean_absolute_error(y_val, y_pred)`
+
+`print("Validation MAE:", mae)`
+
+Predictions:
+
+`pred_df = pd.DataFrame(y_pred, columns=target_cols)`
+
+`pred_df["SMILES"] = df.iloc[y_val.shape[0]:]["SMILES"].values`
+
+`print(pred_df.head())`
 
 # DATA
 Data used from Kaggle’s COVID-19 Bioinformatics Drug Target Challenge that can be found at https://www.kaggle.com/competitions/covid-19-bioinformatics-drug-target-challenge/overview. 
