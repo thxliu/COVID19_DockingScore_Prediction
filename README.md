@@ -41,14 +41,19 @@ train_data = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-chal
 test_data  = pd.read_csv("/kaggle/input/covid-19-bioinformatics-drug-target-challenge/test/small_test_csv.csv")
 
 *IMPORTS*
-`import numpy as np
-import pandas as pd
-from rdkit import Chem
-from rdkit.Chem import rdFingerprintGenerator
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.multioutput import MultiOutputRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error`
+
+`import numpy as np`
+
+`import pandas as pd`
+
+`from rdkit import Chem`
+
+`from rdkit.Chem import rdFingerprintGenerator`
+
+`from sklearn.ensemble import RandomForestRegressor`
+`from sklearn.multioutput import MultiOutputRegressor`
+`from sklearn.model_selection import train_test_split`
+`from sklearn.metrics import mean_absolute_error`
 
 
 
